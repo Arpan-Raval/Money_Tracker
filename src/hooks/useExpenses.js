@@ -64,16 +64,16 @@ export const useExpenses = () => {
     setExpenses(prev => prev.filter(item => item.id !== id));
   }, []);
 
-  // Reset to seed data
-  const resetToSampleData = useCallback(() => {
-    setExpenses(INITIAL_SEED_EXPENSES);
-  }, []);
+  // // Reset to seed data
+  // const resetToSampleData = useCallback(() => {
+  //   setExpenses(INITIAL_SEED_EXPENSES);
+  // }, []);
 
   return {
     expenses,
     addExpense,
     updateExpense,
     deleteExpense,
-    resetToSampleData
+    // resetToSampleData
   };
 };
