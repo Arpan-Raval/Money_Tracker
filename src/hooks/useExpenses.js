@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { INITIAL_SEED_EXPENSES, generateId } from '../utils/expenseUtils';
+import { generateId } from '../utils/expenseUtils';
 
 const STORAGE_KEY = 'expense_tracker_2_data';
 
@@ -16,8 +16,8 @@ export const useExpenses = () => {
     } catch (e) {
       console.error('Error loading expenses from localStorage:', e);
     }
-    // Return initial seed data if nothing is saved
-    return INITIAL_SEED_EXPENSES;
+    // Return empty array if nothing is saved
+    return [];
   });
 
   // Sync to localStorage whenever expenses change
@@ -64,16 +64,13 @@ export const useExpenses = () => {
     setExpenses(prev => prev.filter(item => item.id !== id));
   }, []);
 
-  // // Reset to seed data
-  // const resetToSampleData = useCallback(() => {
-  //   setExpenses(INITIAL_SEED_EXPENSES);
-  // }, []);
+
 
   return {
     expenses,
     addExpense,
     updateExpense,
     deleteExpense,
-    // resetToSampleData
+
   };
 };
