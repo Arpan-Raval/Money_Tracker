@@ -4,6 +4,7 @@ import {
   formatCurrency,
   formatDate,
   getDailyTotal,
+  getDailyTotalByType,
   getExpensesByDate
 } from '../utils/expenseUtils';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -28,7 +29,9 @@ export const Calendar = ({
 
   // Selected date statistics & expenses
   const selectedDayExpenses = getExpensesByDate(expenses, selectedDate);
-  const selectedDayTotal = getDailyTotal(expenses, selectedDate);
+  const selectedDayIncome = getDailyTotalByType(expenses, selectedDate, 'income');
+  const selectedDayExpense = getDailyTotalByType(expenses, selectedDate, 'expense');
+  const selectedDayBalance = selectedDayIncome - selectedDayExpense;
 
   return (
     <div>
@@ -82,14 +85,15 @@ export const Calendar = ({
                 type="button"
                 className={cellClass}
                 onClick={() => onSelectDate(item.dateStr)}
-                aria-label={`${formatDate(item.dateStr, 'full')}, ${item.hasExpenses ? formatCurrency(item.total) : 'no expenses'}`}
+                aria-label={`${formatDate(item.dateStr, 'full')}, ${item.hasExpenses ? formatCurrency(item.total) : 'no transactions'}`}
               >
                 <span className="calendar-day-number">{item.day}</span>
-                {item.hasExpenses && (
-                  <span
-                    className="calendar-day-indicator"
-                    title={`${item.expenseCount} expenses (${formatCurrency(item.total)})`}
-                  />
+                {/* Dual indicators: green for income, blue for expense */}
+                {(item.hasIncome || item.hasExpense) && (
+                  <div className="calendar-day-indicators">
+                    {item.hasIncome && <span className="calendar-dot-income" />}
+                    {item.hasExpense && <span className="calendar-dot-expense" />}
+                  </div>
                 )}
               </button>
             );
@@ -97,16 +101,39 @@ export const Calendar = ({
         </div>
       </div>
 
-      {/* Selected Date Summary & Expense Breakdown */}
+      {/* Selected Date Summary */}
       <div className="day-summary-card">
         <div>
           <div className="day-summary-title">{formatDate(selectedDate, 'dayMonth')}</div>
-          <div className="day-summary-subtitle">Total spent</div>
+          <div className="day-summary-subtitle">
+            {selectedDayIncome > 0 && selectedDayExpense > 0
+              ? `+${formatCurrency(selectedDayIncome)} income · -${formatCurrency(selectedDayExpense)} spent`
+              : selectedDayIncome > 0
+                ? `+${formatCurrency(selectedDayIncome)} income`
+                : selectedDayExpense > 0
+                  ? `-${formatCurrency(selectedDayExpense)} spent`
+                  : 'No transactions'
+            }
+          </div>
         </div>
-        <div className="day-summary-amount">{formatCurrency(selectedDayTotal)}</div>
+        <div
+          className="day-summary-amount"
+          style={{
+            color: selectedDayBalance > 0
+              ? 'var(--income-primary)'
+              : selectedDayBalance < 0
+                ? 'var(--text-primary)'
+                : 'var(--text-muted)'
+          }}
+        >
+          {selectedDayExpenses.length > 0
+            ? (selectedDayBalance >= 0 ? '+' : '-') + formatCurrency(Math.abs(selectedDayBalance))
+            : formatCurrency(0)
+          }
+        </div>
       </div>
 
-      {/* List of expenses for selected day */}
+      {/* List of transactions for selected day */}
       <div className="expense-list">
         {selectedDayExpenses.length > 0 ? (
           selectedDayExpenses.map((expense) => (
@@ -118,7 +145,7 @@ export const Calendar = ({
           ))
         ) : (
           <div style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-            No expenses for this day.
+            No transactions for this day.
           </div>
         )}
       </div>

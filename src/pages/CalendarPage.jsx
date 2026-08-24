@@ -16,7 +16,7 @@ export const CalendarPage = ({
     <div>
       <PageHeader
         title="Calendar"
-        subtitle="Track your spending by day."
+        subtitle="Track your money flow by day."
       />
 
       <Calendar
