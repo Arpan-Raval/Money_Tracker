@@ -3,8 +3,8 @@ import { AlertCircle } from 'lucide-react';
 
 export const ConfirmDialog = ({
   isOpen,
-  title = "Delete expense?",
-  message = "This expense will be permanently removed.",
+  title = "Delete transaction?",
+  message = "This transaction will be permanently removed.",
   confirmLabel = "Delete",
   cancelLabel = "Cancel",
   onConfirm,

@@ -11,7 +11,7 @@ import { useExpenses } from './hooks/useExpenses';
 import { toDateString } from './utils/expenseUtils';
 
 export default function App() {
-  // Expense data hook backed by localStorage
+  // Transaction data hook backed by localStorage
   const { expenses, addExpense, updateExpense, deleteExpense } = useExpenses();
 
   // Navigation tab state: 'home' | 'calendar' | 'expenses'
@@ -65,22 +65,22 @@ export default function App() {
     setSelectedCalendarDate('2026-08-20');
   };
 
-  // Expense selection -> open details modal
+  // Transaction selection -> open details modal
   const handleSelectExpense = (expense) => {
     setActiveExpense(expense);
     setIsDetailsOpen(true);
   };
 
-  // Edit expense flow
+  // Edit transaction flow
   const handleOpenEdit = (expense) => {
     setActiveExpense(expense);
     setIsDetailsOpen(false);
     setIsEditModalOpen(true);
   };
 
-  // Submit new expense
-  const handleSaveNewExpense = (expenseData) => {
-    const created = addExpense(expenseData);
+  // Submit new transaction (income or expense)
+  const handleSaveNewExpense = (transactionData) => {
+    const created = addExpense(transactionData);
     if (created && created.date) {
       // If added for a specific month, switch calendar/home view to that month so user sees it immediately
       const [y, m] = created.date.split('-').map(Number);
@@ -93,10 +93,10 @@ export default function App() {
     setIsAddModalOpen(false);
   };
 
-  // Submit edited expense
-  const handleSaveEditedExpense = (expenseData) => {
+  // Submit edited transaction
+  const handleSaveEditedExpense = (transactionData) => {
     if (activeExpense) {
-      updateExpense(activeExpense.id, expenseData);
+      updateExpense(activeExpense.id, transactionData);
       setIsEditModalOpen(false);
       setActiveExpense(null);
     }
@@ -124,6 +124,11 @@ export default function App() {
     setExpensePendingDelete(null);
     setIsConfirmDeleteOpen(false);
   };
+
+  // Determine type label for delete confirmation
+  const pendingDeleteType = expensePendingDelete
+    ? ((expensePendingDelete.type || 'expense') === 'income' ? 'income' : 'expense')
+    : 'transaction';
 
   return (
     <Layout>
@@ -176,7 +181,7 @@ export default function App() {
         onOpenAddModal={() => setIsAddModalOpen(true)}
       />
 
-      {/* Add Expense Sheet */}
+      {/* Add Transaction Sheet */}
       <ExpenseForm
         isOpen={isAddModalOpen}
         mode="add"
@@ -184,7 +189,7 @@ export default function App() {
         onSubmit={handleSaveNewExpense}
       />
 
-      {/* Edit Expense Sheet */}
+      {/* Edit Transaction Sheet */}
       <ExpenseForm
         isOpen={isEditModalOpen}
         mode="edit"
@@ -197,7 +202,7 @@ export default function App() {
         onDelete={handleRequestDelete}
       />
 
-      {/* Focused Expense Details View */}
+      {/* Focused Transaction Details View */}
       <ExpenseDetails
         expense={activeExpense}
         isOpen={isDetailsOpen}
@@ -212,8 +217,8 @@ export default function App() {
       {/* Deletion Confirmation Modal */}
       <ConfirmDialog
         isOpen={isConfirmDeleteOpen}
-        title="Delete expense?"
-        message={`Are you sure you want to delete "${expensePendingDelete?.description || 'this expense'}"? This action cannot be undone.`}
+        title={`Delete ${pendingDeleteType}?`}
+        message={`Are you sure you want to delete "${expensePendingDelete?.description || 'this transaction'}"? This action cannot be undone.`}
         confirmLabel="Delete"
         cancelLabel="Cancel"
         onConfirm={handleConfirmDelete}

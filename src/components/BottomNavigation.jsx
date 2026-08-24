@@ -5,7 +5,7 @@ export const BottomNavigation = ({ activeTab, onTabChange, onOpenAddModal }) => 
   const tabs = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'calendar', label: 'Calendar', icon: CalendarIcon },
-    { id: 'expenses', label: 'Expenses', icon: Receipt },
+    { id: 'expenses', label: 'Transactions', icon: Receipt },
   ];
 
   const activeIndex = tabs.findIndex(tab => tab.id === activeTab);
@@ -34,12 +34,12 @@ export const BottomNavigation = ({ activeTab, onTabChange, onOpenAddModal }) => 
           );
         })}
 
-        {/* Floating Add Expense Action Button */}
+        {/* Floating Add Transaction Action Button */}
         <button
           type="button"
           className="nav-add-btn"
           onClick={onOpenAddModal}
-          aria-label="Add new expense"
+          aria-label="Add new transaction"
         >
           <Plus size={24} strokeWidth={2.4} />
         </button>
