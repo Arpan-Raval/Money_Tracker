@@ -1,5 +1,5 @@
 /* ==========================================================================
-   EXPENSE TRACKER 2.0 - DESIGN SYSTEM & GLOBAL STYLES
+   MONEY TRACKER 2.0 - DESIGN SYSTEM & GLOBAL STYLES
    Minimal Dark Charcoal / Obsidian Aesthetic
    ========================================================================== */
 
@@ -36,6 +36,16 @@
   --accent-subtle: rgba(79, 128, 255, 0.12);
   --accent-subtle-hover: rgba(79, 128, 255, 0.18);
   --accent-text: #ffffff;
+
+  /* Income Accent (Green) */
+  --income-primary: #34d399;
+  --income-hover: #2bc48d;
+  --income-subtle: rgba(52, 211, 153, 0.12);
+  --income-subtle-hover: rgba(52, 211, 153, 0.18);
+  --income-text: #34d399;
+
+  /* Expense Accent (Soft Red-Orange) */
+  --expense-text: #f87171;
 
   /* Danger / Destructive for confirmation */
   --danger-primary: #ef4444;
@@ -993,4 +1003,204 @@ body {
 @keyframes scaleIn {
   from { transform: scale(0.92); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   TYPE TOGGLE (Income / Expense pill buttons in form)
+   ========================================================================== */
+.type-toggle-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.type-toggle-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--border-card);
+  background-color: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.type-toggle-btn:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.type-toggle-btn.active-income {
+  background-color: var(--income-subtle);
+  border-color: var(--income-primary);
+  color: var(--income-primary);
+}
+
+.type-toggle-btn.active-expense {
+  background-color: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ==========================================================================
+   FILTER TABS (All / Income / Expenses on transactions page)
+   ========================================================================== */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-tab {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-card);
+  background-color: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.filter-tab:hover {
+  background-color: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.filter-tab.active {
+  background-color: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.filter-tab.active-income {
+  background-color: var(--income-subtle);
+  border-color: var(--income-primary);
+  color: var(--income-primary);
+}
+
+/* ==========================================================================
+   INCOME / EXPENSE AMOUNT COLORS
+   ========================================================================== */
+.amount-income {
+  color: var(--income-text) !important;
+}
+
+.amount-expense {
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   TYPE BADGE (shown in details view)
+   ========================================================================== */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+}
+
+.type-badge.income {
+  background-color: var(--income-subtle);
+  color: var(--income-primary);
+}
+
+.type-badge.expense {
+  background-color: var(--accent-subtle);
+  color: var(--accent-primary);
+}
+
+/* ==========================================================================
+   CALENDAR DUAL INDICATORS
+   ========================================================================== */
+.calendar-day-indicators {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-dot-income {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--income-primary);
+}
+
+.calendar-dot-expense {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: var(--accent-primary);
+}
+
+.calendar-day-cell.selected .calendar-dot-income,
+.calendar-day-cell.selected .calendar-dot-expense {
+  background-color: #ffffff;
+}
+
+/* ==========================================================================
+   SUMMARY STAT CARDS (Balance / Income / Expense row)
+   ========================================================================== */
+.summary-stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.summary-stat-mini {
+  background-color: var(--bg-card-subtle);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-card);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-stat-mini .stat-mini-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.summary-stat-mini .stat-mini-amount {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.summary-stat-mini .stat-mini-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Transaction card left-border accent */
+.expense-card.type-income {
+  border-left: 3px solid var(--income-primary);
+}
+
+.expense-card.type-expense {
+  border-left: 3px solid var(--accent-primary);
 }

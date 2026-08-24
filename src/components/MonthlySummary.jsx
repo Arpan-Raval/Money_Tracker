@@ -1,12 +1,16 @@
 import React from 'react';
 import { formatCurrency, formatDate } from '../utils/expenseUtils';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, TrendingUp, TrendingDown } from 'lucide-react';
 
 export const MonthlySummary = ({
   currentYear,
   currentMonth,
   totalSpent,
+  monthlyIncome,
+  monthlyExpense,
   expensesCount,
+  incomeCount,
+  expenseOnlyCount,
   onPrevMonth,
   onNextMonth,
   onResetToCurrentMonth
@@ -15,9 +19,12 @@ export const MonthlySummary = ({
   const monthDateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
   const monthTitle = formatDate(monthDateStr, 'monthYear');
 
+  const balance = (monthlyIncome || 0) - (monthlyExpense || 0);
+  const isPositive = balance >= 0;
+
   return (
-    <section aria-label="Monthly Spending Summary">
-      {/* Main Monthly Summary Card */}
+    <section aria-label="Monthly Financial Summary">
+      {/* Main Monthly Summary Card — Balance */}
       <div className="monthly-summary-card">
         <div className="monthly-summary-header">
           <button
@@ -48,16 +55,40 @@ export const MonthlySummary = ({
           </button>
         </div>
 
-        <div className="summary-label">Total spent</div>
-        <div className="summary-amount">{formatCurrency(totalSpent)}</div>
+        <div className="summary-label">Balance</div>
+        <div
+          className="summary-amount"
+          style={{ color: isPositive ? 'var(--income-primary)' : 'var(--expense-text)' }}
+        >
+          {isPositive ? '+' : '-'}{formatCurrency(Math.abs(balance))}
+        </div>
       </div>
 
-      {/* Expenses this month card */}
-      <div className="stat-card">
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span className="stat-number">{expensesCount}</span>
-          <span className="stat-label">
-            {expensesCount === 1 ? 'Expense this month' : 'Expenses this month'}
+      {/* Income & Expense stat cards side by side */}
+      <div className="summary-stats-row">
+        <div className="summary-stat-mini">
+          <span className="stat-mini-label">
+            <TrendingUp size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+            Income
+          </span>
+          <span className="stat-mini-amount amount-income">
+            +{formatCurrency(monthlyIncome || 0)}
+          </span>
+          <span className="stat-mini-count">
+            {incomeCount || 0} {(incomeCount || 0) === 1 ? 'entry' : 'entries'}
+          </span>
+        </div>
+
+        <div className="summary-stat-mini">
+          <span className="stat-mini-label">
+            <TrendingDown size={12} style={{ marginRight: '4px', verticalAlign: 'middle' }} />
+            Expenses
+          </span>
+          <span className="stat-mini-amount" style={{ color: 'var(--text-primary)' }}>
+            -{formatCurrency(monthlyExpense || 0)}
+          </span>
+          <span className="stat-mini-count">
+            {expenseOnlyCount || 0} {(expenseOnlyCount || 0) === 1 ? 'entry' : 'entries'}
           </span>
         </div>
       </div>
