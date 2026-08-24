@@ -1,5 +1,5 @@
 /**
- * Utility functions for Expense Tracker
+ * Utility functions for Money Tracker (Income & Expense)
  */
 
 // Format numbers into Indian Rupee currency format (e.g. ₹12,450 or ₹500.50)
@@ -12,9 +12,17 @@ export const formatCurrency = (amount) => {
   const formatted = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: isInteger ? 0 : 2,
     minimumFractionDigits: isInteger ? 0 : 2,
-  }).format(num);
+  }).format(Math.abs(num));
   
   return `₹${formatted}`;
+};
+
+// Format with sign prefix for display (e.g. +₹5,000 or -₹1,200)
+export const formatSignedCurrency = (amount, type) => {
+  const formatted = formatCurrency(amount);
+  if (type === 'income') return `+${formatted}`;
+  if (type === 'expense') return `-${formatted}`;
+  return formatted;
 };
 
 // Format date string (YYYY-MM-DD) into readable formats like "20 August 2026"
@@ -69,13 +77,23 @@ export const toDateString = (date = new Date()) => {
   return `${y}-${m}-${d}`;
 };
 
-// Filter expenses by exact YYYY-MM-DD
+// ============================================================
+// Type-aware filtering helpers
+// ============================================================
+
+// Filter transactions by exact YYYY-MM-DD
 export const getExpensesByDate = (expenses, dateStr) => {
   if (!Array.isArray(expenses) || !dateStr) return [];
   return expenses.filter(exp => exp.date === dateStr);
 };
 
-// Filter expenses by year and month (1-indexed month: 1 = Jan, 8 = Aug)
+// Filter transactions by exact date AND type
+export const getTransactionsByDateAndType = (expenses, dateStr, type) => {
+  if (!Array.isArray(expenses) || !dateStr) return [];
+  return expenses.filter(exp => exp.date === dateStr && (exp.type || 'expense') === type);
+};
+
+// Filter transactions by year and month (1-indexed month: 1 = Jan, 8 = Aug)
 export const getExpensesByMonth = (expenses, year, month) => {
   if (!Array.isArray(expenses)) return [];
   const yStr = String(year);
@@ -84,24 +102,66 @@ export const getExpensesByMonth = (expenses, year, month) => {
   return expenses.filter(exp => exp.date && exp.date.startsWith(prefix));
 };
 
-// Calculate total spent for a specific date
+// Filter by month AND type
+export const getTransactionsByMonthAndType = (expenses, year, month, type) => {
+  return getExpensesByMonth(expenses, year, month).filter(exp => (exp.type || 'expense') === type);
+};
+
+// Shorthand: get only income for a month
+export const getIncomeByMonth = (expenses, year, month) => {
+  return getTransactionsByMonthAndType(expenses, year, month, 'income');
+};
+
+// Shorthand: get only expenses for a month
+export const getExpensesByMonthOnly = (expenses, year, month) => {
+  return getTransactionsByMonthAndType(expenses, year, month, 'expense');
+};
+
+// ============================================================
+// Totals
+// ============================================================
+
+// Calculate total for a specific date (all types)
 export const getDailyTotal = (expenses, dateStr) => {
   const dayExpenses = getExpensesByDate(expenses, dateStr);
   return dayExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 };
 
-// Calculate total spent for a specific month
+// Calculate total for a specific date filtered by type
+export const getDailyTotalByType = (expenses, dateStr, type) => {
+  const items = getTransactionsByDateAndType(expenses, dateStr, type);
+  return items.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+};
+
+// Calculate total for a specific month (all types combined — legacy compat)
 export const getMonthlyTotal = (expenses, year, month) => {
   const monthExpenses = getExpensesByMonth(expenses, year, month);
   return monthExpenses.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
 };
 
-// Count expenses in a specific month
+// Monthly income total
+export const getMonthlyIncome = (expenses, year, month) => {
+  const items = getIncomeByMonth(expenses, year, month);
+  return items.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+};
+
+// Monthly expense total
+export const getMonthlyExpenseOnly = (expenses, year, month) => {
+  const items = getExpensesByMonthOnly(expenses, year, month);
+  return items.reduce((sum, exp) => sum + (Number(exp.amount) || 0), 0);
+};
+
+// Monthly balance (income - expenses)
+export const getMonthlyBalance = (expenses, year, month) => {
+  return getMonthlyIncome(expenses, year, month) - getMonthlyExpenseOnly(expenses, year, month);
+};
+
+// Count transactions in a specific month
 export const getMonthlyExpensesCount = (expenses, year, month) => {
   return getExpensesByMonth(expenses, year, month).length;
 };
 
-// Sort expenses by newest date first, then by id
+// Sort transactions by newest date first, then by id
 export const sortExpensesNewestFirst = (expenses) => {
   if (!Array.isArray(expenses)) return [];
   return [...expenses].sort((a, b) => {
@@ -117,7 +177,7 @@ export const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
-  return 'exp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  return 'txn_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 };
 
 // Generate full calendar grid data for a given month and year
@@ -130,40 +190,42 @@ export const generateCalendarMonth = (year, month, expenses = []) => {
 
   const days = [];
 
+  const buildDayData = (dayNum, dateStr, isCurrentMonth, extra = {}) => {
+    const total = getDailyTotal(expenses, dateStr);
+    const dayExpenses = getExpensesByDate(expenses, dateStr);
+    const incomeTotal = getDailyTotalByType(expenses, dateStr, 'income');
+    const expenseTotal = getDailyTotalByType(expenses, dateStr, 'expense');
+    const hasIncome = incomeTotal > 0;
+    const hasExpense = expenseTotal > 0;
+
+    return {
+      day: dayNum,
+      dateStr,
+      isCurrentMonth,
+      hasExpenses: dayExpenses.length > 0,
+      hasIncome,
+      hasExpense,
+      total,
+      incomeTotal,
+      expenseTotal,
+      expenseCount: dayExpenses.length,
+      ...extra
+    };
+  };
+
   // Previous month trailing days
   for (let i = startingDayOfWeek - 1; i >= 0; i--) {
     const dayNum = daysInPrevMonth - i;
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear = month === 1 ? year - 1 : year;
     const dateStr = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
-    const total = getDailyTotal(expenses, dateStr);
-    const dayExpenses = getExpensesByDate(expenses, dateStr);
-
-    days.push({
-      day: dayNum,
-      dateStr,
-      isCurrentMonth: false,
-      isPrevMonth: true,
-      hasExpenses: dayExpenses.length > 0,
-      total,
-      expenseCount: dayExpenses.length
-    });
+    days.push(buildDayData(dayNum, dateStr, false, { isPrevMonth: true }));
   }
 
   // Current month days
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const total = getDailyTotal(expenses, dateStr);
-    const dayExpenses = getExpensesByDate(expenses, dateStr);
-
-    days.push({
-      day: d,
-      dateStr,
-      isCurrentMonth: true,
-      hasExpenses: dayExpenses.length > 0,
-      total,
-      expenseCount: dayExpenses.length
-    });
+    days.push(buildDayData(d, dateStr, true));
   }
 
   // Next month leading days to complete the grid (up to multiple of 7)
@@ -172,18 +234,7 @@ export const generateCalendarMonth = (year, month, expenses = []) => {
     const nextMonth = month === 12 ? 1 : month + 1;
     const nextYear = month === 12 ? year + 1 : year;
     const dateStr = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const total = getDailyTotal(expenses, dateStr);
-    const dayExpenses = getExpensesByDate(expenses, dateStr);
-
-    days.push({
-      day: d,
-      dateStr,
-      isCurrentMonth: false,
-      isNextMonth: true,
-      hasExpenses: dayExpenses.length > 0,
-      total,
-      expenseCount: dayExpenses.length
-    });
+    days.push(buildDayData(d, dateStr, false, { isNextMonth: true }));
   }
 
   return days;

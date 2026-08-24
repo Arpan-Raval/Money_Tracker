@@ -10,11 +10,15 @@ export const useExpenses = () => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed;
+          // Auto-migrate: any item without a `type` field defaults to 'expense'
+          return parsed.map(item => ({
+            ...item,
+            type: item.type || 'expense'
+          }));
         }
       }
     } catch (e) {
-      console.error('Error loading expenses from localStorage:', e);
+      console.error('Error loading transactions from localStorage:', e);
     }
     // Return empty array if nothing is saved
     return [];
@@ -25,30 +29,32 @@ export const useExpenses = () => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(expenses));
     } catch (e) {
-      console.error('Error saving expenses to localStorage:', e);
+      console.error('Error saving transactions to localStorage:', e);
     }
   }, [expenses]);
 
-  // Add a new expense
-  const addExpense = useCallback((expenseData) => {
-    const newExpense = {
+  // Add a new transaction (income or expense)
+  const addExpense = useCallback((transactionData) => {
+    const newTransaction = {
       id: generateId(),
-      amount: Number(expenseData.amount),
-      description: expenseData.description.trim(),
-      date: expenseData.date,
+      type: transactionData.type || 'expense',
+      amount: Number(transactionData.amount),
+      description: transactionData.description.trim(),
+      date: transactionData.date,
       createdAt: Date.now()
     };
 
-    setExpenses(prev => [newExpense, ...prev]);
-    return newExpense;
+    setExpenses(prev => [newTransaction, ...prev]);
+    return newTransaction;
   }, []);
 
-  // Update existing expense
+  // Update existing transaction
   const updateExpense = useCallback((id, updatedData) => {
     setExpenses(prev => prev.map(item => {
       if (item.id === id) {
         return {
           ...item,
+          type: updatedData.type !== undefined ? updatedData.type : item.type,
           amount: Number(updatedData.amount !== undefined ? updatedData.amount : item.amount),
           description: (updatedData.description !== undefined ? updatedData.description : item.description).trim(),
           date: updatedData.date !== undefined ? updatedData.date : item.date,
@@ -59,7 +65,7 @@ export const useExpenses = () => {
     }));
   }, []);
 
-  // Delete an expense
+  // Delete a transaction
   const deleteExpense = useCallback((id) => {
     setExpenses(prev => prev.filter(item => item.id !== id));
   }, []);
