@@ -1,7 +1,7 @@
 import React from 'react';
 import { Receipt, Plus } from 'lucide-react';
 
-export const EmptyState = ({ onAddExpense, title = "No expenses yet", subtitle = "Start tracking your spending by adding your first expense." }) => {
+export const EmptyState = ({ onAddExpense, title = "No transactions yet", subtitle = "Start tracking by adding your first transaction." }) => {
   return (
     <div className="empty-state">
       <div className="empty-state-icon">
@@ -16,7 +16,7 @@ export const EmptyState = ({ onAddExpense, title = "No expenses yet", subtitle =
           onClick={onAddExpense}
         >
           <Plus size={16} />
-          <span>Add Expense</span>
+          <span>Add Transaction</span>
         </button>
       )}
     </div>

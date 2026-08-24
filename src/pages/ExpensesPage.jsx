@@ -11,10 +11,18 @@ export const ExpensesPage = ({
   onOpenAddModal
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState('all'); // 'all' | 'income' | 'expense'
 
-  // Sort and filter expenses
+  // Sort and filter transactions
   const filteredExpenses = useMemo(() => {
-    const sorted = sortExpensesNewestFirst(expenses);
+    let items = expenses;
+
+    // Filter by type
+    if (filterType !== 'all') {
+      items = items.filter(exp => (exp.type || 'expense') === filterType);
+    }
+
+    const sorted = sortExpensesNewestFirst(items);
     if (!searchQuery.trim()) return sorted;
 
     const q = searchQuery.toLowerCase().trim();
@@ -23,18 +31,54 @@ export const ExpensesPage = ({
       exp.date.includes(q) ||
       String(exp.amount).includes(q)
     );
-  }, [expenses, searchQuery]);
+  }, [expenses, searchQuery, filterType]);
 
-  const totalSpentAll = useMemo(() => {
-    return filteredExpenses.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  // Compute totals for display
+  const incomeTotal = useMemo(() => {
+    return filteredExpenses
+      .filter(exp => (exp.type || 'expense') === 'income')
+      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [filteredExpenses]);
+
+  const expenseTotal = useMemo(() => {
+    return filteredExpenses
+      .filter(exp => (exp.type || 'expense') === 'expense')
+      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }, [filteredExpenses]);
+
+  const netTotal = incomeTotal - expenseTotal;
 
   return (
     <div>
       <PageHeader
-        title="All Expenses"
-        subtitle="Review everything you've spent."
+        title="All Transactions"
+        subtitle="Review your income and expenses."
       />
+
+      {/* Filter Tabs */}
+      <div className="filter-tabs">
+        <button
+          type="button"
+          className={`filter-tab ${filterType === 'all' ? 'active' : ''}`}
+          onClick={() => setFilterType('all')}
+        >
+          All
+        </button>
+        <button
+          type="button"
+          className={`filter-tab ${filterType === 'income' ? 'active-income' : ''}`}
+          onClick={() => setFilterType('income')}
+        >
+          Income
+        </button>
+        <button
+          type="button"
+          className={`filter-tab ${filterType === 'expense' ? 'active' : ''}`}
+          onClick={() => setFilterType('expense')}
+        >
+          Expenses
+        </button>
+      </div>
 
       {/* Search Input Box */}
       <div className="search-filter-box">
@@ -75,16 +119,31 @@ export const ExpensesPage = ({
           padding: '0 2px'
         }}>
           <span style={{ fontSize: '13px', color: 'var(--text-muted)', fontWeight: 500 }}>
-            {filteredExpenses.length} {filteredExpenses.length === 1 ? 'expense' : 'expenses'}
+            {filteredExpenses.length} {filteredExpenses.length === 1 ? 'transaction' : 'transactions'}
             {searchQuery && ' found'}
           </span>
-          <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>
-            Total: {formatCurrency(totalSpentAll)}
+          <span style={{
+            fontSize: '13px',
+            fontWeight: 600,
+            color: filterType === 'income'
+              ? 'var(--income-primary)'
+              : filterType === 'expense'
+                ? 'var(--text-secondary)'
+                : netTotal >= 0
+                  ? 'var(--income-primary)'
+                  : 'var(--text-secondary)'
+          }}>
+            {filterType === 'income'
+              ? `+${formatCurrency(incomeTotal)}`
+              : filterType === 'expense'
+                ? `-${formatCurrency(expenseTotal)}`
+                : `Net: ${netTotal >= 0 ? '+' : '-'}${formatCurrency(Math.abs(netTotal))}`
+            }
           </span>
         </div>
       )}
 
-      {/* Expense List */}
+      {/* Transaction List */}
       {filteredExpenses.length > 0 ? (
         <div className="expense-list">
           {filteredExpenses.map((expense) => (
@@ -97,8 +156,8 @@ export const ExpensesPage = ({
         </div>
       ) : (
         <EmptyState
-          title={searchQuery ? "No matching expenses" : "No expenses yet"}
-          subtitle={searchQuery ? "Try searching for a different keyword or date." : "Start tracking your spending by adding your first expense."}
+          title={searchQuery ? "No matching transactions" : filterType !== 'all' ? `No ${filterType} transactions` : "No transactions yet"}
+          subtitle={searchQuery ? "Try searching for a different keyword or date." : "Start tracking by adding your first transaction."}
           onAddExpense={onOpenAddModal}
         />
       )}

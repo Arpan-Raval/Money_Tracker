@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toDateString } from '../utils/expenseUtils';
-import { X, Check, Trash2, AlertCircle } from 'lucide-react';
+import { X, Check, Trash2, AlertCircle, TrendingUp, TrendingDown } from 'lucide-react';
 
 export const ExpenseForm = ({
   isOpen,
@@ -10,6 +10,7 @@ export const ExpenseForm = ({
   onSubmit,
   onDelete
 }) => {
+  const [type, setType] = useState('expense');
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(toDateString(new Date()));
@@ -19,10 +20,12 @@ export const ExpenseForm = ({
   useEffect(() => {
     if (isOpen) {
       if (mode === 'edit' && initialExpense) {
+        setType(initialExpense.type || 'expense');
         setAmount(String(initialExpense.amount || ''));
         setDescription(initialExpense.description || '');
         setDate(initialExpense.date || toDateString(new Date()));
       } else {
+        setType('expense');
         setAmount('');
         setDescription('');
         setDate(toDateString(new Date()));
@@ -58,6 +61,7 @@ export const ExpenseForm = ({
     if (!validate()) return;
 
     onSubmit({
+      type,
       amount: Number(amount),
       description: description.trim(),
       date
@@ -67,9 +71,13 @@ export const ExpenseForm = ({
   };
 
   const isEdit = mode === 'edit';
-  const title = isEdit ? 'Edit Expense' : 'Add Expense';
-  const subtitle = isEdit ? 'Update your expense details.' : 'Record a new expense.';
-  const submitLabel = isEdit ? 'Update Expense' : 'Save Expense';
+  const isIncome = type === 'income';
+  const typeLabel = isIncome ? 'Income' : 'Expense';
+  const title = isEdit ? `Edit ${typeLabel}` : `Add ${typeLabel}`;
+  const subtitle = isEdit
+    ? `Update your ${typeLabel.toLowerCase()} details.`
+    : `Record a new ${typeLabel.toLowerCase()}.`;
+  const submitLabel = isEdit ? `Update ${typeLabel}` : `Save ${typeLabel}`;
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
@@ -92,6 +100,26 @@ export const ExpenseForm = ({
             aria-label="Close form"
           >
             <X size={20} />
+          </button>
+        </div>
+
+        {/* Type Toggle */}
+        <div className="type-toggle-group">
+          <button
+            type="button"
+            className={`type-toggle-btn ${type === 'expense' ? 'active-expense' : ''}`}
+            onClick={() => setType('expense')}
+          >
+            <TrendingDown size={18} />
+            <span>Expense</span>
+          </button>
+          <button
+            type="button"
+            className={`type-toggle-btn ${type === 'income' ? 'active-income' : ''}`}
+            onClick={() => setType('income')}
+          >
+            <TrendingUp size={18} />
+            <span>Income</span>
           </button>
         </div>
 
@@ -136,7 +164,7 @@ export const ExpenseForm = ({
               id="expense-description"
               type="text"
               className={`form-input ${errors.description ? 'error' : ''}`}
-              placeholder="e.g. Dinner, Groceries, Flight"
+              placeholder={isIncome ? 'e.g. Salary, Freelance, Gift' : 'e.g. Dinner, Groceries, Flight'}
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value);
@@ -194,7 +222,7 @@ export const ExpenseForm = ({
                 }}
               >
                 <Trash2 size={18} />
-                <span>Delete Expense</span>
+                <span>Delete {typeLabel}</span>
               </button>
             )}
           </div>

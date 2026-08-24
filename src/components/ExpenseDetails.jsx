@@ -1,6 +1,6 @@
 import React from 'react';
 import { formatCurrency, formatDate } from '../utils/expenseUtils';
-import { X, Edit3, Trash2, Calendar, FileText } from 'lucide-react';
+import { X, Edit3, Trash2, Calendar, FileText, TrendingUp, TrendingDown } from 'lucide-react';
 
 export const ExpenseDetails = ({
   expense,
@@ -11,22 +11,21 @@ export const ExpenseDetails = ({
 }) => {
   if (!isOpen || !expense) return null;
 
+  const isIncome = (expense.type || 'expense') === 'income';
+  const typeLabel = isIncome ? 'Income' : 'Expense';
+  const amountClass = isIncome ? 'amount-income' : '';
+
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="bottom-sheet" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="sheet-header">
           <div>
-            <span style={{
-              fontSize: '12px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              color: 'var(--text-muted)'
-            }}>
-              Expense
+            <span className={`type-badge ${isIncome ? 'income' : 'expense'}`}>
+              {isIncome ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              {typeLabel}
             </span>
-            <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '6px' }}>
               {expense.description}
             </h2>
           </div>
@@ -53,14 +52,14 @@ export const ExpenseDetails = ({
           <span style={{ fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Amount
           </span>
-          <div style={{
+          <div className={amountClass} style={{
             fontSize: '38px',
             fontWeight: 700,
-            color: 'var(--text-primary)',
+            color: isIncome ? undefined : 'var(--text-primary)',
             letterSpacing: '-0.03em',
             marginTop: '4px'
           }}>
-            {formatCurrency(expense.amount)}
+            {isIncome ? '+' : '-'}{formatCurrency(expense.amount)}
           </div>
         </div>
 
@@ -88,7 +87,7 @@ export const ExpenseDetails = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <FileText size={18} color="var(--text-muted)" />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Category / Note</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Description</span>
               <span style={{ fontSize: '15px', fontWeight: 500, color: 'var(--text-primary)' }}>
                 {expense.description}
               </span>
@@ -107,7 +106,7 @@ export const ExpenseDetails = ({
             }}
           >
             <Edit3 size={18} />
-            <span>Edit Expense</span>
+            <span>Edit {typeLabel}</span>
           </button>
 
           <button
@@ -118,7 +117,7 @@ export const ExpenseDetails = ({
             }}
           >
             <Trash2 size={18} />
-            <span>Delete Expense</span>
+            <span>Delete {typeLabel}</span>
           </button>
         </div>
       </div>
