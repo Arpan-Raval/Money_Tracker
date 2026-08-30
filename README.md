@@ -1,6 +1,6 @@
 <div align="center">
   
-# 💰 Expense Tracker 2.0
+# 💰 Money Tracker
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React" />
@@ -11,15 +11,15 @@
 
 ### A Next-Generation Personal Finance Manager
 
-Expense Tracker 2.0 is a powerful, modern, and privacy-first web application designed to give you complete control over your personal finances. Built entirely on the frontend with React and Vite, it stores all your financial data securely in your browser—meaning no accounts, no subscriptions, and absolute privacy.
+Money Tracker is a powerful, modern, and privacy-first web application designed to give you complete control over your personal finances. Built entirely on the frontend with React and Vite, it stores all your financial data securely in your browser—meaning no accounts, no subscriptions, and absolute privacy.
 
 </div>
 
 ---
 
-## 🌟 Why Expense Tracker 2.0?
+## 🌟 Why Money Tracker?
 
-Managing money shouldn't be complicated. This application strips away the unnecessary clutter of traditional banking apps to provide a clean, focused, and intuitive experience. Whether you want to log your daily coffee, track your monthly salary, or review your spending habits over the year, Expense Tracker 2.0 makes it effortless.
+Managing money shouldn't be complicated. This application strips away the unnecessary clutter of traditional banking apps to provide a clean, focused, and intuitive experience. Whether you want to log your daily coffee, track your monthly salary, or review your spending habits over the year, Money Tracker makes it effortless.
 
 ### Core Philosophy
 - **Speed First:** Instant loading and saving. No waiting for backend API calls.
