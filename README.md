@@ -30,7 +30,6 @@ Managing money shouldn't be complicated. This application strips away the unnece
 
 ## 📸 Sneak Peek
 
-*(Add your screenshots here by replacing the placeholder links)*
 
 | Home Dashboard | Calendar View | Add Transaction |
 | :---: | :---: | :---: |
