@@ -34,7 +34,7 @@ Managing money shouldn't be complicated. This application strips away the unnece
 
 | Home Dashboard | Calendar View | Add Transaction |
 | :---: | :---: | :---: |
-| <img src="src\assets\project_photo\dashboard.jpg" alt="Home Dashboard" /> | <img src="https://via.placeholder.com/250x450?text=Calendar" alt="Calendar View" /> | <img src="https://via.placeholder.com/250x450?text=Form" alt="Add Transaction" /> |
+| <img src="src\assets\project_photo\dashboard.jpg" alt="Home Dashboard" /> | <img src="src\assets\project_photo\calendar.jpg" alt="Calendar View" /> | <img src="src\assets\project_photo\Add_Transaction.jpg" alt="Add Transaction" /> |
 
 ---
 
